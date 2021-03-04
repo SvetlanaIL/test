@@ -1,57 +1,106 @@
 import React, { useEffect, useState } from "react";
+import InputMask from 'react-input-mask';
 import "./App.css";
 
 function App() {
-  const [num, setNum] = useState();
-  const [color, setColor] = useState();
-  const [text, setText] = useState("");
+  const [state, setState] = useState({
+    userName: "",
+    email: "",
+    phone: "",
+    password: "",
+    repeatPassword: "",
+  });
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (state.userName.length > 19)
+      setError("Введено максимальное количество символов");
+  }, [state.userName]);
 
   const handleChange = (e) => {
-    setNum(e.target.value);
+    setState({ ...state, [e.target.name]: e.target.value });
     // console.log(e.target.value);
   };
 
-  const increment = () => {
-    if (num < 20) {
-      console.log(+num);
-      setText("");
-      setNum(+num + 1);
-      setColor("green");
-    }
+  const onBlurHandle = (e) => {
+    if (!e.target.value) setError("Введите данные");
+    else setError("");
   };
 
-  const decrement = () => {
-    if (num > 1) {
-      setNum(num - 2);
-      setColor("red");
-    }
-  };
+  const validateForm = (email, phone) => {
+    const regEmail = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const regPhone = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im;
+    if(!regEmail.test(String(email).toLowerCase()))
+    setError("Некорректно введен email");
+    else setError ("");
+    if(!regPhone.test(Number(phone)))
+    setError("Некорректно введен телефон");
+    else setError ("");
+  }
 
-  useEffect(() => {
-    if (num > 19) setText("Достигнуто максимальное значение");
-    if (num < 20) setText("");
-    console.log("!!!");
-  }, [num]);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    validateForm(state.email, state.phone);
+    if (state.password !== state.repeatPassword)
+      setError("Пароли не совпадают!");
+    console.log(
+      "name: " + state.userName,
+      "email: " + state.email,
+      "phone: " + state.phone,
+      "password: " + state.password,
+      "repeatPassword: " + state.repeatPassword
+    );
+  };
 
   return (
     <div className="App">
-      <header className="App-header">
+      <div className="error">{error}</div>
+      <form className="form" onSubmit={handleSubmit}>
+        <label>Введите имя</label>
         <input
-          style={{ color: color }}
-          className="Input"
+          name="userName"
+          value={state.userName}
           onChange={handleChange}
-          value={num}
-        ></input>
-        <div>{text}</div>
-        <div className="ButtonBlock">
-          <button className="Button" onClick={increment}>
-            +
-          </button>
-          <button className="Button" onClick={decrement}>
-            -
-          </button>
-        </div>
-      </header>
+          onBlur={onBlurHandle}
+          
+        />
+        <label>Введите email</label>
+        <input
+          name="email"
+          value={state.email}
+          onChange={handleChange}
+          onBlur={onBlurHandle}
+        />
+        <label>Введите телефон</label>
+        {/* <InputMask mask="+7 (111)1111111" maskChar={" "} name="phone"
+          value={state.phone}
+          onChange={handleChange}
+          onBlur={onBlurHandle}/> */}
+        <input
+          name="phone"
+          value={state.phone}
+          onChange={handleChange}
+          onBlur={onBlurHandle}
+          
+        />
+        <label>Введите пароль</label>
+        <input
+          name="password"
+          value={state.password}
+          onChange={handleChange}
+          onBlur={onBlurHandle}
+        />
+        <label>Повторите пароль</label>
+        <input
+          name="repeatPassword"
+          value={state.repeatPassword}
+          onChange={handleChange}
+          onBlur={onBlurHandle}
+        />
+        <button type="submit" className="button">
+          Зарегистрироваться
+        </button>
+      </form>
     </div>
   );
 }
